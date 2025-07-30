@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Player</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="left-sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fa-solid fa-database"></i> Music Library</h3>
+                 <button id="scan-music-btn" title="สแกนโฟลเดอร์เพลง"><i class="fa-solid fa-sync"></i> สแกนเพลง</button>
+            </div>
+            <div class="playlist-controls">
+                <button id="new-playlist-btn"><i class="fa-solid fa-plus"></i> สร้างเพลย์ลิสต์ใหม่</button>
+            </div>
+            <ul id="playlist-list" class="playlist-list"></ul>
+        </div>
+        
+        <div class="main-content">
+            <div class="search-bar-container">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" id="search-input" placeholder="ค้นหาเพลงหรือเพลย์ลิสต์...">
+            </div>
+
+            <div id="playlist-details-view" class="hidden">
+                 <button id="close-playlist-btn" class="close-btn" title="ปิดเพลย์ลิสต์">&times;</button>
+                <h1 id="details-name"></h1>
+                <p id="details-song-count"></p>
+                <button id="play-playlist-btn" class="action-btn accent"><i class="fa-solid fa-play"></i> เล่นเพลย์ลิสต์</button>
+                <button id="add-songs-btn" class="action-btn"><i class="fa-solid fa-plus"></i> เพิ่มเพลงจากคลัง</button>
+                <button id="delete-playlist-btn" class="action-btn danger"><i class="fa-solid fa-trash"></i> ลบเพลย์ลิสต์นี้</button>
+                <hr>
+                <ul id="song-list"></ul>
+            </div>
+            
+            <div id="search-results-view" class="hidden">
+                <h2>ผลการค้นหาทั้งหมด</h2>
+                <ul id="search-results-list"></ul>
+            </div>
+
+            <div id="welcome-view">
+                <h1>ยินดีต้อนรับ</h1>
+                <p>กด "สแกนเพลง" เพื่อเริ่มเพิ่มเพลงเข้าคลังของคุณ หรือสร้างเพลย์ลิสต์ใหม่</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="now-playing-bar">
+        <div class="song-info"><span id="current-song-title">ยังไม่มีเพลงเล่น</span></div>
+        <div class="player-controls">
+            <button id="prev-btn" class="control-btn"><i class="fa-solid fa-backward-step"></i></button>
+            <button id="play-pause-btn" class="control-btn play-btn"><i class="fa-solid fa-play"></i></button>
+            <button id="next-btn" class="control-btn"><i class="fa-solid fa-forward-step"></i></button>
+            <button id="autoplay-btn" class="control-btn" title="เล่นอัตโนมัติ"><i class="fa-solid fa-repeat"></i></button>
+        </div>
+        <div class="playback-timeline">
+            <span id="current-time">0:00</span>
+            <input type="range" id="progress-bar" class="progress-bar" value="0" step="1">
+            <span id="total-time">0:00</span>
+        </div>
+    </div>
+
+    <audio id="audio-player"></audio>
+    
+    <div id="add-songs-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2>เลือกเพลงเพื่อเพิ่มลงเพลย์ลิสต์</h2>
+            <input type="text" id="modal-search-input" placeholder="ค้นหาเพลงในคลัง...">
+            <ul id="modal-song-library"></ul>
+            <div class="modal-actions">
+                <button id="save-songs-to-playlist-btn">บันทึก</button>
+                <button id="close-modal-btn">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
