@@ -1,8 +1,9 @@
 {
-  "dependencies": {
+  "devDependencies": {
     "chokidar": "^4.0.3",
     "cors": "^2.8.5",
     "express": "^5.1.0",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "tailwindcss": "^4.1.11"
   }
 }

@@ -27,7 +27,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
     }
 });
 
-// --- API สำหรับเพลย์ลิสต์ ---
+// === API สำหรับเพลย์ลิสต์ ===
 app.get('/api/playlists', (req, res) => {
     db.all("SELECT * FROM playlists ORDER BY name", [], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -43,32 +43,47 @@ app.post('/api/playlists', (req, res) => {
     });
 });
 app.delete('/api/playlists/:id', (req, res) => {
-    db.run("DELETE FROM playlists WHERE id = ?", req.params.id, function(err) {
+    db.run("DELETE FROM playlists WHERE id = ?", [req.params.id], function(err) {
         if (err) return res.status(500).json({ error: err.message });
         res.json({ deleted: this.changes });
     });
 });
 
-// --- API สำหรับเพลง ---
+// VVVVVV ---- เราจะเพิ่ม LOG ในฟังก์ชันนี้ ---- VVVVVV
+app.put('/api/playlists/:id', (req, res) => {
+    // ---- บรรทัดที่เพิ่มเข้ามา ----
+    console.log(`\n>>> PUT request received for /api/playlists/${req.params.id}`);
+    console.log(`>>> Request body:`, req.body);
+    // -------------------------
+
+    const { name } = req.body;
+    if (!name) return res.status(400).json({ error: 'New name is required' });
+    db.run("UPDATE playlists SET name = ? WHERE id = ?", [name, req.params.id], function(err) {
+        if (err) {
+            console.error('!!! Database Error on UPDATE:', err.message);
+            return res.status(500).json({ error: err.message });
+        }
+        console.log(`<<< Successfully updated playlist. Changes: ${this.changes}`);
+        res.json({ updated: this.changes });
+    });
+});
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+// === API สำหรับเพลง ===
 app.get('/api/songs', (req, res) => {
     db.all("SELECT * FROM songs ORDER BY name", [], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(rows);
     });
 });
-
-// *** API ใหม่: แก้ไขชื่อเพลง ***
 app.put('/api/songs/:id', (req, res) => {
     const { name } = req.body;
-    if (!name) return res.status(400).json({ error: 'Song name is required' });
-    
-    const sql = "UPDATE songs SET name = ? WHERE id = ?";
-    db.run(sql, [name, req.params.id], function(err) {
+    if (!name) return res.status(400).json({ error: 'New name is required' });
+    db.run("UPDATE songs SET name = ? WHERE id = ?", [name, req.params.id], function(err) {
         if (err) return res.status(500).json({ error: err.message });
         res.json({ updated: this.changes });
     });
 });
-
 
 app.get('/api/playlists/:id/songs', (req, res) => {
     const sql = `SELECT s.id, s.name, s.path FROM songs s
@@ -96,7 +111,7 @@ app.delete('/api/playlists/:playlistId/songs/:songId', (req, res) => {
     });
 });
 
-// --- API อื่นๆ (ค้นหา, สแกน, เล่นเพลง) ---
+// === API อื่นๆ ===
 app.get('/api/search', (req, res) => {
     const term = req.query.term;
     if (!term) return res.status(400).json({ error: 'Search term is required' });
@@ -117,9 +132,10 @@ app.get('/api/search', (req, res) => {
         });
     });
 });
+
 app.post('/api/scan', (req, res) => {
     const { directoryPath } = req.body;
-    if (!directoryPath || !fs.existsSync(directoryPath)) return res.status(400).json({ error: "Invalid directory path" });
+    if (!directoryPath || !fs.existsSync(directoryPath)) return res.status(400).json({ error: "Invalid or missing directory path" });
     let musicFiles = [];
     try {
         function findMusicFiles(dir) {
@@ -141,6 +157,7 @@ app.post('/api/scan', (req, res) => {
         res.status(201).json({ message: `Scan complete. Found ${musicFiles.length} files. Added ${this.changes} new songs.` });
     });
 });
+
 app.get('/play/:songId', (req, res) => {
     db.get("SELECT path FROM songs WHERE id = ?", [req.params.songId], (err, row) => {
         if (err) return res.status(500).json({ error: err.message });
