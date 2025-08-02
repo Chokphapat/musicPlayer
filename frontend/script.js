@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const playlistListEl = document.getElementById("playlist-list");
   const newPlaylistBtn = document.getElementById("new-playlist-btn");
   const scanMusicBtn = document.getElementById("scan-music-btn");
-  const welcomeView = document.getElementById("welcome-view");
+
   const playlistDetailsView = document.getElementById("playlist-details-view");
   // VVVV Removed Elements VVVV
   // const searchResultsView = document.getElementById("search-results-view");
@@ -162,6 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updateActivePlaylistStyle();
   }
   async function showPlaylistDetails(playlistId) {
+
     console.log(
       `%c[SHOW_DETAILS] Showing details for playlist ID: ${playlistId}`,
       "color: green;"
@@ -183,65 +184,86 @@ document.addEventListener("DOMContentLoaded", () => {
     );
     currentSongs = await api.getSongsForPlaylist(playlistId);
 
-    welcomeView.classList.add("hidden");
+
     playlistDetailsView.classList.remove("hidden");
 
     updateActivePlaylistStyle();
     renderSongs();
   }
 
+  // frontend/script.js
+
   function renderSongs() {
-    songListEl.innerHTML = ""; // This is now the <tbody>
+    songListEl.innerHTML = "";
     if (!currentPlaylist) return;
 
     detailsName.textContent = currentPlaylist.name;
     detailsSongCount.textContent = `${currentSongs.length} เพลง`;
 
-    // VVVV Logic Added VVVV
-    // Filter songs based on the song search input
-    const searchTerm = songSearchInput.value.toLowerCase();
-    const filteredSongs = currentSongs.filter((song) =>
-      song.name.toLowerCase().includes(searchTerm)
-    );
+    // ถ้ามีเพลงในเพลย์ลิสต์ ให้ใช้ปกเพลงแรกเป็นปกเพลย์ลิสต์
+    if (currentSongs.length > 0 && currentSongs[0].coverImageURL) {
+      document.getElementById('details-cover-image').src = currentSongs[0].coverImageURL;
+      document.getElementById('details-cover-image').classList.remove('hidden');
+      document.getElementById('details-cover-icon').classList.add('hidden');
+    } else {
+      document.getElementById('details-cover-image').classList.add('hidden');
+      document.getElementById('details-cover-icon').classList.remove('hidden');
+    }
 
-    // Loop through the *filtered* songs
-    filteredSongs.forEach((song) => {
-      const originalIndex = currentSongs.findIndex((s) => s.id === song.id);
+    const searchTerm = document.getElementById("song-search-input").value.toLowerCase();
+    const filteredSongs = currentSongs.filter(song => song.name.toLowerCase().includes(searchTerm));
+
+    filteredSongs.forEach((song, index) => {
+      const originalIndex = currentSongs.findIndex(s => s.id === song.id);
       const tr = document.createElement("tr");
       tr.dataset.index = originalIndex;
+      tr.className = "group hover:bg-zinc-800/50 rounded-md cursor-pointer relative";
 
-      // Add a class for hover effect, which is now handled by JS for simplicity with tables
-      tr.className = "hover:bg-zinc-800/50 rounded-md cursor-pointer";
+      const coverArtHtml = song.coverImageURL
+        ? `<img src="${song.coverImageURL}" alt="${song.name}" class="w-10 h-10 object-cover rounded-md">`
+        : `<div class="w-10 h-10 bg-zinc-700 flex items-center justify-center rounded-md"><i class="fa-solid fa-music text-zinc-400"></i></div>`;
 
-      // NOTE: The 'artist' and 'duration' columns are placeholders as the backend doesn't provide this data.
       tr.innerHTML = `
-            <td class="p-2 text-center text-zinc-400">${originalIndex + 1}</td>
-            <td class="p-2 text-white font-semibold">${song.name}</td>
-            <td class="p-2 text-zinc-400">—</td>
-            <td class="p-2 text-zinc-400 text-right">—</td>
+            <td class="p-2 text-center text-zinc-400 group-hover:text-white">${index + 1}</td>
+            <td class="p-2 text-white font-semibold flex items-center gap-x-4">
+                ${coverArtHtml}
+                <span class="song-name-span">${song.name}</span>
+            </td>
+            <td class="p-2 text-zinc-400">${song.artist || 'N/A'}</td>
+            <td class="p-2 text-zinc-400 text-right">--:--</td>
+            <td class="p-2 text-right opacity-0 group-hover:opacity-100 transition-opacity">
+                <button class="edit-song-btn text-zinc-400 hover:text-white px-2" data-song-id="${song.id}" title="แก้ไขชื่อเพลง"><i class="fa-solid fa-pencil"></i></button>
+                <button class="remove-song-btn text-zinc-400 hover:text-white px-2" data-song-id="${song.id}" title="ลบเพลงออกจากเพลย์ลิสต์"><i class="fa-solid fa-trash"></i></button>
+            </td>
         `;
-
-      // Add event listeners for song actions (edit/remove) to the row itself
-      const songActionsHtml = `
-            <div class="song-actions absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button class="edit-song-btn" data-song-id="${song.id}" title="แก้ไขชื่อเพลง"><i class="fa-solid fa-pencil"></i></button>
-                <button class="remove-song-btn" data-song-id="${song.id}" title="ลบเพลงออกจากเพลย์ลิสต์"><i class="fa-solid fa-trash"></i></button>
-            </div>
-        `;
-      // To make actions work, we wrap the title in a relative container
-      tr.cells[1].classList.add("relative", "group");
-      tr.cells[1].innerHTML += songActionsHtml;
-
       songListEl.appendChild(tr);
     });
-
     updatePlayingHighlight();
   }
+
+  // และอัปเดตฟังก์ชัน updatePlayingHighlight ด้วย
+  function updatePlayingHighlight() {
+    if (!currentPlaylist) return;
+    const allSongItems = songListEl.querySelectorAll("tr");
+    allSongItems.forEach((tr) => {
+      const originalIndex = parseInt(tr.dataset.index);
+      const nameSpan = tr.querySelector('.song-name-span');
+      if (nameSpan) {
+        nameSpan.classList.toggle(
+          "text-green-500",
+          isPlaying &&
+          parseInt(currentlyPlayingPlaylistId) === currentPlaylist.id &&
+          originalIndex === currentSongIndex
+        );
+      }
+    });
+  }
   function closePlaylistView() {
+    document.querySelector("aside").classList.remove("hidden");
     console.log("[VIEW_CLOSE] Closing playlist view.");
     currentPlaylist = null;
     playlistDetailsView.classList.add("hidden");
-    welcomeView.classList.remove("hidden");
+
     updateActivePlaylistStyle();
   }
   playlistSearchInput.addEventListener("input", (e) => {
@@ -306,17 +328,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function initializeApp() {
-    console.log(
-      "%c[INIT] Initializing application...",
-      "color: purple; font-weight:bold;"
-    );
+    // ฟังก์ชันสำหรับหน้าหลัก ต้องใช้ syncPlaylists เพื่อโหลดรายการเพลย์ลิสต์ทั้งหมด
     await syncPlaylists();
-    autoplayBtn.classList.toggle("active", isAutoplayOn);
-    if (volumeSlider) audioPlayer.volume = volumeSlider.value / 100;
-    console.log(
-      "%c[INIT] Application ready.",
-      "color: purple; font-weight:bold;"
-    );
+    const welcomeView = document.getElementById("welcome-view");
+    if (playlists.length > 0) {
+      welcomeView.innerHTML = `
+        <h1 class="text-4xl font-bold">เลือกเพลย์ลิสต์เพื่อเริ่มต้น</h1>
+        <p class="text-zinc-400 mt-2">หรือสร้างเพลย์ลิสต์ใหม่ทางด้านซ้าย</p>
+      `;
+    }
   }
 
   // The rest of the functions are unchanged as they are not the likely source of the problem.
@@ -328,7 +348,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const newPlaylist = await api.createPlaylist(name.trim());
         await syncPlaylists(newPlaylist.id);
       } catch (e) {
-        alert("ไม่สามารถสร้างเพลย์ลิสต์ได้ อาจมีชื่อซ้ำกัน");
+        console.error("Failed to create playlist:", e);
+        alert("ไม่สามารถสร้างเพลย์ลิสต์ได้ อาจมีชื่อซ้ำกันในระบบ");
       }
     }
   });
@@ -351,33 +372,32 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
   songListEl.addEventListener("click", async (e) => {
-    const songTr = e.target.closest("tr"); // <<< แก้จาก li เป็น tr
+    const songTr = e.target.closest("tr");
     if (!songTr) return;
 
     const editBtn = e.target.closest(".edit-song-btn");
     const removeBtn = e.target.closest(".remove-song-btn");
 
     if (editBtn) {
-      e.stopPropagation();
+      e.stopPropagation(); // หยุดไม่ให้ event เล่นเพลง
       const songId = parseInt(editBtn.dataset.songId);
-      const songToEdit = currentSongs.find((s) => s.id === songId);
-      if (!songToEdit) return;
-
+      const songToEdit = currentSongs.find(s => s.id === songId);
       const newName = prompt("แก้ไขชื่อเพลง:", songToEdit.name);
-      if (newName && newName.trim() && newName !== songToEdit.name) {
+
+      if (newName && newName.trim() && newName.trim() !== songToEdit.name) {
         await api.updateSong(songId, newName.trim());
-        songToEdit.name = newName.trim();
-        renderSongs();
+        await syncPlaylists(currentPlaylist.id); // รีเฟรชข้อมูลทั้งหมด
       }
     } else if (removeBtn) {
-      e.stopPropagation();
+      e.stopPropagation(); // หยุดไม่ให้ event เล่นเพลง
       const songId = parseInt(removeBtn.dataset.songId);
-      await api.removeSongFromPlaylist(currentPlaylist.id, songId);
-      currentSongs = currentSongs.filter((s) => s.id !== songId);
-      renderSongs();
+      if (confirm("คุณแน่ใจหรือไม่ว่าต้องการลบเพลงนี้ออกจากเพลย์ลิสต์?")) {
+        await api.removeSongFromPlaylist(currentPlaylist.id, songId);
+        await syncPlaylists(currentPlaylist.id); // รีเฟรชข้อมูลทั้งหมด
+      }
     } else {
-      // เมื่อคลิกที่แถวเพื่อเล่นเพลง
-      playSong(parseInt(songTr.dataset.index)); // <<< แก้จาก songLi เป็น songTr
+      // ถ้าไม่ได้คลิกปุ่ม ก็ให้เล่นเพลง
+      playSong(parseInt(songTr.dataset.index));
     }
   });
   saveSongsToPlaylistBtn.addEventListener("click", async () => {
@@ -461,9 +481,8 @@ document.addEventListener("DOMContentLoaded", () => {
     filteredLibrary.forEach((song) => {
       const alreadyInPlaylist = currentSongs.some((ps) => ps.id === song.id);
       const li = document.createElement("li");
-      li.innerHTML = `<input type="checkbox" data-song-id="${song.id}" ${
-        alreadyInPlaylist ? "checked disabled" : ""
-      }><span>${song.name}</span>`;
+      li.innerHTML = `<input type="checkbox" data-song-id="${song.id}" ${alreadyInPlaylist ? "checked disabled" : ""
+        }><span>${song.name}</span>`;
       modalSongLibrary.appendChild(li);
     });
   }

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/frontend/script.js"></script>
+    <title>กำลังค้นหาเพลย์ลิสต์...</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #b3b3b3;
+            font-family: Arial, Helvetica, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .loader {
+            border: 6px solid #282828;
+            border-top: 6px solid #1DB954;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1.5s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            color: #e60023;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loading-view">
+        <div class="loader"></div>
+        <p>กำลังค้นหาเพลย์ลิสต์สำหรับสีของคุณ...</p>
+    </div>
+    
+    <div id="error-view" class="error" style="display: none;"></div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const loadingView = document.getElementById('loading-view');
+        const errorView = document.getElementById('error-view');
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const colorCode = urlParams.get('color');
+
+        if (!colorCode) {
+            loadingView.style.display = 'none';
+            errorView.textContent = 'เกิดข้อผิดพลาด: ไม่พบรหัสสีใน URL';
+            errorView.style.display = 'block';
+            return;
+        }
+
+        try {
+            // เรียกใช้ API ใหม่ที่เราสร้างขึ้น
+            const response = await fetch(`http://localhost:3000/api/data-by-color?code=${encodeURIComponent(colorCode)}`);
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'ไม่พบข้อมูลสำหรับสีนี้');
+            }
+
+            const data = await response.json();
+
+            // ส่งต่อไปยังหน้า playlist พร้อมกับ ID ทั้งสองตัว
+            window.location.href = `/playlist.html?playlistId=${data.playlistId}&songId=${data.songId}`;
+
+        } catch (error) {
+            loadingView.style.display = 'none';
+            errorView.textContent = `เกิดข้อผิดพลาด: ${error.message}`;
+            errorView.style.display = 'block';
+            console.error('Redirect Error:', error);
+        }
+    });
+</script>
+</body>
+</html>

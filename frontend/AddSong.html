@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Music Player</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/frontend/style.css" />
+    <script src="/frontend/script.js"></script>
+  </head>
+
+  <body class="bg-[#121212] text-white font-sans">
+    <div class="flex h-[calc(100vh-90px)]">
+      <aside class="w-[300px] bg-black p-2 flex flex-col">
+        <div class="bg-[#121212] flex flex-row justify-between px-2 pt-1">
+          <a
+            href="#"
+            class="text-[12px] text-zinc-300 flex items-center gap-x-3 p-2 hover:text-white transition"
+          >
+            <span>คลังเพลงของคุณ</span>
+          </a>
+          <div
+            class="border rounded-full border-[#1F1F1F] bg-[#1F1F1F] h-[30px]"
+          >
+            <button
+              id="new-playlist-btn"
+              class="text-[12px] text-zinc-300 p-2 hover:text-white transition w-full"
+            >
+              <i class="fa-solid fa-plus text-xl"></i>
+              <span>สร้างเพลย์ลิสต์</span>
+            </button>
+          </div>
+        </div>
+        <div class="bg-[#121212] rounded-lg flex-1 overflow-y-auto ps-5">
+          <div class="pb-2">
+            <button
+              id="scan-music-btn"
+              title="สแกนโฟลเดอร์เพลง"
+              class="text-zinc-300 hover:text-white transition font-semibold flex items-center gap-x-2 w-full mb-2"
+            >
+              <i class="fa-solid fa-sync"></i> สแกนหาเพลงใหม่
+            </button>
+            <hr class="border-zinc-800" />
+          </div>
+          <div
+            class="bg-zinc-800 rounded-xl px-4 py-2 flex items-center gap-x-3 mb-5 w-[200px] max-w-sm"
+          >
+            <i class="fa-solid fa-search text-zinc-400"></i>
+            <input
+              type="text"
+              id="playlist-search-input"
+              placeholder="ค้นหาเพลย์ลิสต์..."
+              class="bg-transparent focus:outline-none w-full"
+            />
+          </div>
+          <ul id="playlist-list" class="pb-4 flex flex-col gap-y-1"></ul>
+        </div>
+      </aside>
+
+      <main
+        class="flex-1 overflow-y-auto bg-gradient-to-b from-zinc-800 to-[#121212] ps-5"
+      >
+        <div id="playlist-details-view" class="hidden">
+          <div class="bg-zinc-800 h-[210px]">
+            <div class="mt-10 mb-5 ps-5">
+              <header class="flex items-end gap-6 mb-6">
+                <div
+                  id="playlist-cover-art-details"
+                  class="w-48 h-48 bg-zinc-800 shadow-lg rounded-md overflow-hidden"
+                >
+                  <img
+                    src=""
+                    alt="Playlist Cover"
+                    id="details-cover-image"
+                    class="w-full h-full object-cover hidden"
+                  />
+                  <div class="w-full h-full flex items-center justify-center">
+                    <i
+                      class="fa-solid fa-music text-zinc-500 text-7xl"
+                      id="details-cover-icon"
+                    ></i>
+                  </div>
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm font-bold">เพลย์ลิสต์</p>
+                  <h1
+                    id="details-name"
+                    class="text-5xl lg:text-7xl font-black break-words"
+                  ></h1>
+                  <p id="details-song-count" class="text-zinc-400 mt-2"></p>
+                </div>
+                <button
+                  id="edit-playlist-name-btn"
+                  title="แก้ไขชื่อเพลย์ลิสต์"
+                  class="text-zinc-400 hover:text-white"
+                >
+                  <i class="fa-solid fa-pencil"></i>
+                </button>
+              </header>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-6 mb-6 justify-between p-6">
+            <div class="flex items-center gap-6">
+              <button
+                id="play-playlist-btn"
+                class="bg-green-500 text-black rounded-full w-14 h-14 flex items-center justify-center text-2xl shadow-lg hover:scale-105 transition"
+              >
+                <i class="fa-solid fa-play"></i>
+              </button>
+              <button
+                id="add-songs-btn"
+                class="bg-zinc-800/70 rounded-full p-2 hover:bg-zinc-700 transition"
+              >
+                <i class="fa-solid fa-plus p-1"></i>
+              </button>
+              <button
+                id="delete-playlist-btn"
+                class="bg-red-600/70 rounded-full p-2 hover:bg-red-500 transition"
+              >
+                <i class="fa-solid fa-trash p-1"></i>
+              </button>
+            </div>
+
+            <div
+              class="bg-zinc-800 rounded-xl px-4 py-2 flex items-center gap-x-3 w-full max-w-sm"
+            >
+              <i class="fa-solid fa-search text-zinc-400"></i>
+              <input
+                type="text"
+                id="song-search-input"
+                placeholder="ค้นหาในเพลย์ลิสต์นี้..."
+                class="bg-transparent focus:outline-none w-full"
+              />
+            </div>
+          </div>
+
+          <table id="song-table" class="w-full text-left p-6">
+    <thead>
+      <tr class="border-b border-zinc-700">
+        <th
+          class="p-2 text-zinc-400 text-sm font-normal uppercase tracking-wider w-10 text-center"
+        >
+          #
+        </th>
+        <th
+          class="p-2 text-zinc-400 text-sm font-normal uppercase tracking-wider"
+        >
+          ชื่อ
+        </th>
+        <th
+          class="p-2 text-zinc-400 text-sm font-normal uppercase tracking-wider"
+        >
+          ศิลปิน
+        </th>
+        <th
+          class="p-2 text-zinc-400 text-sm font-normal uppercase tracking-wider text-right"
+        >
+          <i class="fa-regular fa-clock"></i>
+        </th>
+        <th class="p-2 w-20"></th>
+      </tr>
+    </thead>
+    <tbody id="song-list"></tbody>
+</table>
+        </div>
+
+        <div id="welcome-view" class="text-center pt-20">
+          <h1 class="text-4xl font-bold">ยินดีต้อนรับสู่ Music Player</h1>
+          <p class="text-zinc-400 mt-2">
+            กด "สแกนหาเพลงใหม่" เพื่อเริ่มต้นใช้งาน
+          </p>
+        </div>
+      </main>
+    </div>
+
+    <div
+      class="fixed bottom-0 left-0 right-0 h-[90px] bg-zinc-950/90 backdrop-blur-sm border-t border-zinc-800 px-5 flex items-center justify-between"
+    >
+      <div class="song-info flex items-center gap-x-4">
+        <div
+          id="now-playing-cover-art"
+          class="w-12 h-12 bg-zinc-800 rounded-md overflow-hidden flex-shrink-0"
+        >
+          <img
+            src=""
+            alt="Now Playing Cover"
+            id="now-playing-cover-image"
+            class="w-full h-full object-cover hidden"
+          />
+          <div class="w-full h-full flex items-center justify-center">
+            <i
+              class="fa-solid fa-music text-zinc-500 text-sm"
+              id="now-playing-cover-icon"
+            ></i>
+          </div>
+        </div>
+        <span id="current-song-title" class="font-semibold truncate"
+          >ยังไม่มีเพลงเล่น</span
+        >
+      </div>
+      <div class="w-2/5 flex flex-col items-center gap-y-2">
+        <div class="flex items-center gap-x-5">
+          <button
+            id="prev-btn"
+            class="control-btn text-zinc-400 hover:text-white transition"
+          >
+            <i class="fa-solid fa-backward-step text-lg"></i>
+          </button>
+          <button
+            id="play-pause-btn"
+            class="control-btn play-btn bg-white text-black rounded-full w-10 h-10 flex items-center justify-center"
+          >
+            <i class="fa-solid fa-play"></i>
+          </button>
+          <button
+            id="next-btn"
+            class="control-btn text-zinc-400 hover:text-white transition"
+          >
+            <i class="fa-solid fa-forward-step text-lg"></i>
+          </button>
+        </div>
+        <div class="w-full flex items-center gap-x-2">
+          <span id="current-time" class="text-xs text-zinc-400">0:00</span>
+          <input
+            type="range"
+            id="progress-bar"
+            value="0"
+            step="1"
+            class="w-full h-1 bg-zinc-600 rounded-full appearance-none cursor-pointer"
+          />
+          <span id="total-time" class="text-xs text-zinc-400">0:00</span>
+        </div>
+      </div>
+      <div class="w-1/4 flex items-center justify-end gap-x-4">
+        <button
+          id="autoplay-btn"
+          class="control-btn text-zinc-400 hover:text-white transition"
+          title="เล่นอัตโนมัติ"
+        >
+          <i class="fa-solid fa-repeat"></i>
+        </button>
+        <i class="fa-solid fa-volume-high text-zinc-400"></i>
+        <input
+          type="range"
+          id="volume-slider"
+          min="0"
+          max="100"
+          value="100"
+          class="w-24 h-1 bg-zinc-600 rounded-full appearance-none cursor-pointer"
+        />
+      </div>
+    </div>
+    <audio id="audio-player"></audio>
+    <div
+      id="add-songs-modal"
+      class="modal-overlay hidden fixed inset-0 bg-black/70 flex justify-center items-center z-50"
+    >
+      <div
+        class="modal-content bg-zinc-800 p-6 rounded-lg w-full max-w-2xl flex flex-col gap-y-4"
+      >
+        <h2 class="text-xl font-bold">เลือกเพลงเพื่อเพิ่มลงเพลย์ลิสต์</h2>
+        <input
+          type="text"
+          id="modal-search-input"
+          placeholder="ค้นหาเพลงในคลัง..."
+          class="bg-zinc-700 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+        />
+        <ul id="modal-song-library" class="overflow-y-auto max-h-80 pr-2"></ul>
+        <div class="flex justify-end gap-x-3 mt-4">
+          <button
+            id="close-modal-btn"
+            class="bg-zinc-600 hover:bg-zinc-500 font-bold py-2 px-4 rounded-md transition"
+          >
+            ยกเลิก
+          </button>
+          <button
+            id="save-songs-to-playlist-btn"
+            class="bg-green-500 hover:bg-green-600 text-black font-bold py-2 px-4 rounded-md transition"
+          >
+            บันทึก
+          </button>
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>

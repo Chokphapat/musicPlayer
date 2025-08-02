@@ -79,3 +79,35 @@ body {
 .modal-actions { margin-top: 20px; text-align: right; }
 .modal-actions button { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px; }
 #save-songs-to-playlist-btn { background-color: var(--accent-color); color: white; }
+
+
+@keyframes equalizer {
+  0% {
+    transform: scaleY(0.7);
+  }
+  50% {
+    transform: scaleY(1.3);
+  }
+  100% {
+    transform: scaleY(0.7);
+  }
+}
+
+.equalizer-animation {
+  display: inline-block;
+  width: 2px;
+  height: 16px;
+  background-color: #1ed760; /* สีเขียว Spotify */
+  margin-right: 2px;
+  border-radius: 2px;
+  transform-origin: bottom center;
+  animation: equalizer 1.2s infinite alternate;
+}
+
+.equalizer-animation:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.equalizer-animation:nth-child(3) {
+  animation-delay: 0.4s;
+}

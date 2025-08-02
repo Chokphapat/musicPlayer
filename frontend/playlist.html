@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Player</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/frontend/style.css">
+</head>
+<body class="bg-[#121212] text-white font-sans ">
+
+    <div class="flex h-[calc(100vh-90px)]">
+        <main class="w-full overflow-y-auto bg-gradient-to-b from-zinc-800 to-[#121212] ps-8 pe-8">
+            <div id="playlist-details-view ">
+                <div class="">
+                    <div class="pt-12 pb-5 px-6 ps-8 pe-8">
+                        <header class="flex items-end gap-6">
+                            <div class="w-48 h-48 bg-zinc-800 shadow-lg rounded-md overflow-hidden flex-shrink-0">
+                                <img src="" alt="Playlist Cover" id="details-cover-image" class="w-full h-full object-cover hidden">
+                                <div class="w-full h-full flex items-center justify-center">
+                                    <i class="fa-solid fa-music text-zinc-500 text-7xl" id="details-cover-icon"></i>
+                                </div>
+                            </div>
+                            <div class="flex-1 ">
+                                <p class="text-sm font-bold">เพลย์ลิสต์</p>
+                                <h1 id="details-name" class="text-5xl lg:text-7xl font-black break-words">Loading...</h1>
+                                <p id="details-song-count" class="text-zinc-400 mt-2"></p>
+                            </div>
+                        </header>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-6 p-6  ps-8 pe-8">
+                    <button id="play-playlist-btn" class="bg-green-500 text-black rounded-full w-14 h-14 flex items-center justify-center text-2xl shadow-lg hover:scale-105 transition"><i class="fa-solid fa-play"></i></button>
+                </div>
+
+                <table class="w-full text-left px-6 ">
+    <thead>
+        <tr class="border-b border-zinc-700 ">
+            <th class="p-2 text-zinc-400 text-sm font-normal uppercase tracking-wider w-10 text-center">#</th>
+            <th class="p-2 text-zinc-400 text-sm font-normal uppercase tracking-wider">ชื่อ</th>
+            <th class="p-2 text-zinc-400 text-sm font-normal uppercase tracking-wider text-right"><i class="fa-regular fa-clock"></i></th>
+        </tr>
+    </thead>
+    <tbody id="song-list">
+        </tbody>
+</table>
+            </div>
+        </main>
+    </div>
+
+    <div class="fixed bottom-0 left-0 right-0 h-[90px] bg-zinc-950/90 backdrop-blur-sm border-t border-zinc-800 px-5 flex items-center justify-between">
+        <div id="now-playing-info" class="w-1/4 flex items-center gap-x-3">
+    <div class="w-14 h-14 bg-zinc-800 rounded-md flex-shrink-0 flex items-center justify-center">
+        <i class="fa-solid fa-music text-zinc-500"></i>
+    </div>
+    <div class="flex flex-col">
+        <span class="font-semibold text-white truncate">ยังไม่มีเพลงเล่น</span>
+        <span class="text-sm text-zinc-400"></span>
+    </div>
+</div>
+        <div class="w-2/5 flex flex-col items-center gap-y-2">
+            <div class="flex items-center gap-x-5">
+                <button id="prev-btn" class="control-btn text-zinc-400 hover:text-white transition"><i class="fa-solid fa-backward-step text-lg"></i></button>
+                <button id="play-pause-btn" class="control-btn play-btn bg-white text-black rounded-full w-10 h-10 flex items-center justify-center"><i class="fa-solid fa-play"></i></button>
+                <button id="next-btn" class="control-btn text-zinc-400 hover:text-white transition"><i class="fa-solid fa-forward-step text-lg"></i></button>
+            </div>
+            <div class="w-full flex items-center gap-x-2">
+                <span id="current-time" class="text-xs text-zinc-400">0:00</span>
+                <input type="range" id="progress-bar" value="0" step="1" class="w-full h-1 bg-zinc-600 rounded-full appearance-none cursor-pointer">
+                <span id="total-time" class="text-xs text-zinc-400">0:00</span>
+            </div>
+        </div>
+        <div class="w-1/4 flex items-center justify-end gap-x-4">
+            <button id="autoplay-btn" class="control-btn text-zinc-400 hover:text-white transition" title="เล่นอัตโนมัติ"><i class="fa-solid fa-repeat"></i></button>
+            <i class="fa-solid fa-volume-high text-zinc-400"></i>
+            <input type="range" id="volume-slider" min="0" max="100" value="100" class="w-24 h-1 bg-zinc-600 rounded-full appearance-none cursor-pointer">
+        </div>
+    </div>
+
+    <audio id="audio-player"></audio>
+    <script src="/frontend/playlist.js"></script>
+</body>
+</html>
